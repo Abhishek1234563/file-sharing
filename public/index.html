@@ -32,11 +32,9 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    /* Hide default file input */
     input[type="file"] {
       display: none;
     }
-    /* Custom file button */
     .custom-file-label {
       display: inline-block;
       padding: 10px 20px;
@@ -56,11 +54,11 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      margin-left: 10px;
     }
     button:hover {
       background-color: #0056b3;
     }
-    /* Styling for received files */
     .download-link {
       display: block;
       margin: 10px 0;
@@ -74,9 +72,13 @@
     .download-link:hover {
       background-color: #f0f0f0;
     }
-    /* Additional container for files list */
     #filesList {
       margin-top: 10px;
+    }
+    #fileStatus {
+      margin: 10px 0;
+      font-weight: bold;
+      color: #555;
     }
   </style>
 </head>
@@ -84,24 +86,22 @@
   <div class="container">
     <h1>File Sharing App</h1>
     
-    <!-- Room Section -->
     <div id="roomSection" class="section">
       <input type="text" id="roomId" placeholder="Enter Room ID">
       <button id="joinRoomBtn">Join Room</button>
     </div>
     
-    <!-- File Section -->
     <div id="fileSection" class="section" style="display: none;">
       <h2>Room: <span id="currentRoom"></span></h2>
       
-      <!-- Custom file input -->
       <label for="fileInput" class="custom-file-label">Choose File</label>
       <input type="file" id="fileInput">
+      
+      <div id="fileStatus"></div>
       
       <button id="sendFileBtn">Send File</button>
     </div>
     
-    <!-- Download Section -->
     <div id="downloadSection" class="section">
       <h2>Received Files</h2>
       <div id="filesList"></div>
@@ -125,8 +125,17 @@
       }
     });
 
+    const fileInput = document.getElementById('fileInput');
+    const fileStatus = document.getElementById('fileStatus');
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileStatus.textContent = `File selected: ${fileInput.files[0].name}`;
+      } else {
+        fileStatus.textContent = '';
+      }
+    });
+
     document.getElementById('sendFileBtn').addEventListener('click', () => {
-      const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
       if (!file) {
         alert('Please select a file!');
@@ -140,6 +149,8 @@
           roomId: currentRoom,
           fileName: file.name,
           fileData: fileData
+        }, (ackMessage) => {
+          fileStatus.textContent = ackMessage;
         });
       };
       reader.readAsDataURL(file);
